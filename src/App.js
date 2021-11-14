@@ -1,4 +1,8 @@
 import { useState } from "react";
+import Button from "react-bootstrap/Button";
+import Container from "react-bootstrap/Container";
+import Badge from "react-bootstrap/Badge";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function NamesList(props) {
   let names = props.names;
@@ -98,11 +102,17 @@ function App() {
   }
 
   return (
-    <>
+    <Container>
       <h1>Name Shuffler, All Hands DSS Mississauga</h1>
       <h2>Hint: Use "GCal's send email to guests" to copy names</h2>
       {showNames && (
-        <h2>Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆</h2>
+        <h1>
+          <Badge pill bg="primary">
+            Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆
+          </Badge>
+        </h1>
+
+        // <h2>Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆</h2>
       )}
       <form onSubmit={handleAdd}>
         {showTextArea && (
@@ -116,13 +126,16 @@ function App() {
         )}
 
         <br />
-        {addButton && <button type="submit">Add</button>}
+        {addButton && <Button type="submit">Add</Button>}
         {randomButton && (
-          <button onClick={handleRandom}>Randomly Select One</button>
+          <Button onClick={handleRandom} variant="info">
+            Randomly Select One
+          </Button>
         )}
       </form>
+      <br />
       <NamesList names={namesArray} chosenNames={chosenNames} />
-    </>
+    </Container>
   );
 }
 
