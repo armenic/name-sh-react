@@ -2,7 +2,21 @@ import { useState } from "react";
 
 function NamesList(props) {
   let names = props.names;
-  const listItems = names.map((name, i) => <li key={i}>{name}</li>);
+  let chosens = props.chosenNames;
+  const listItems = names.map((name, i) => {
+    if (chosens.includes(name)) {
+      const liStyle = {
+        color: "blue",
+      };
+      return (
+        <li key={i} style={liStyle}>
+          {name}
+        </li>
+      );
+    } else {
+      return <li key={i}>{name}</li>;
+    }
+  });
   return (
     <>
       <p>Total number: {names.length}</p>
@@ -49,9 +63,11 @@ const randomValueFromArray = (myArray) => {
 function App() {
   const [names, setNames] = useState("");
   const [randomButton, setRandomButton] = useState(false);
+  const [addButton, setAddButton] = useState(true);
   const [namesArray, setNamesArray] = useState([]);
   const [chosenNames, setChosenNames] = useState([]);
   const [showNames, setShowNames] = useState(false);
+  const [showTextArea, setShowTextArea] = useState(true);
 
   function handleNames(event) {
     setNames(event.target.value);
@@ -60,7 +76,9 @@ function App() {
   function handleAdd(event) {
     setNamesArray(makeArray(names));
     setRandomButton(true);
+    setAddButton(false);
     setShowNames(false);
+    setShowTextArea(false);
     setChosenNames([]);
     alreadyDone.length = 0;
     event.preventDefault();
@@ -73,32 +91,37 @@ function App() {
     setShowNames(true);
     if (namesArray.length === chosenNames.length + 1) {
       setRandomButton(false);
+      setShowTextArea(true);
+      setAddButton(true);
       console.log("Everybody was chosen!");
     }
   }
 
   return (
     <>
-      <h1>All Hands DSS Mississauga</h1>
+      <h1>Name Shuffler, All Hands DSS Mississauga</h1>
       <h2>Hint: Use "GCal's send email to guests" to copy names</h2>
       {showNames && (
         <h2>Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆</h2>
       )}
       <form onSubmit={handleAdd}>
-        <textarea
-          value={names}
-          onChange={handleNames}
-          rows="10"
-          cols="70"
-          required
-        ></textarea>
+        {showTextArea && (
+          <textarea
+            value={names}
+            onChange={handleNames}
+            rows="10"
+            cols="70"
+            required
+          ></textarea>
+        )}
+
         <br />
-        <button type="submit">Add</button>
+        {addButton && <button type="submit">Add</button>}
         {randomButton && (
           <button onClick={handleRandom}>Randomly Select One</button>
         )}
       </form>
-      <NamesList names={namesArray} />
+      <NamesList names={namesArray} chosenNames={chosenNames} />
     </>
   );
 }
