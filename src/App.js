@@ -2,6 +2,9 @@ import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Badge from "react-bootstrap/Badge";
+import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function NamesList(props) {
@@ -9,11 +12,13 @@ function NamesList(props) {
   let chosens = props.chosenNames;
   const listItems = names.map((name, i) => {
     if (chosens.includes(name)) {
-      const liStyle = {
-        color: "blue",
-      };
       return (
-        <li key={i} style={liStyle}>
+        <li
+          key={i}
+          style={{
+            color: "blue",
+          }}
+        >
           {name}
         </li>
       );
@@ -33,7 +38,8 @@ function makeArray(namesString) {
   const re = /,*[\r\n]/;
   let namesArray = namesString.split(re);
   namesArray = namesArray.filter((name) => name.trim() !== "");
-  return namesArray;
+  let namesArrayUnique = namesArray.filter((v, i, a) => a.indexOf(v) === i);
+  return namesArrayUnique;
 }
 
 // Array to store indexes which are left to access.
@@ -66,6 +72,7 @@ const randomValueFromArray = (myArray) => {
 
 function App() {
   const [names, setNames] = useState("");
+  const [number, setNumber] = useState(1);
   const [randomButton, setRandomButton] = useState(false);
   const [addButton, setAddButton] = useState(true);
   const [namesArray, setNamesArray] = useState([]);
@@ -76,8 +83,12 @@ function App() {
   function handleNames(event) {
     setNames(event.target.value);
   }
+  function handleNumber(event) {
+    setNumber(event.target.value);
+  }
 
   function handleAdd(event) {
+    event.preventDefault();
     setNamesArray(makeArray(names));
     setRandomButton(true);
     setAddButton(false);
@@ -85,54 +96,84 @@ function App() {
     setShowTextArea(false);
     setChosenNames([]);
     alreadyDone.length = 0;
-    event.preventDefault();
   }
 
   function handleRandom(event) {
     event.preventDefault();
-    let chosenName = randomValueFromArray(namesArray);
-    setChosenNames((prevState) => [...prevState, chosenName]);
-    setShowNames(true);
-    if (namesArray.length === chosenNames.length + 1) {
-      setRandomButton(false);
-      setShowTextArea(true);
-      setAddButton(true);
-      console.log("Everybody was chosen!");
+    let remainder = namesArray.length % parseInt(number);
+
+    if (remainder) {
+      window.alert(
+        `Value ${number} has to be a divisor of 
+        Total number ${namesArray.length}, 
+        e.g. 2 is a divisor of 4 (no remainder left)`
+      );
+    } else {
+      let chosenName = randomValueFromArray(namesArray);
+      setChosenNames((prevState) => [...prevState, chosenName]);
+      setShowNames(true);
+      if (namesArray.length === chosenNames.length + 1) {
+        setRandomButton(false);
+        setShowTextArea(true);
+        setAddButton(true);
+        console.log("Everybody was chosen!");
+      }
     }
   }
 
   return (
     <Container>
-      <h1>Name Shuffler, All Hands DSS Mississauga</h1>
-      <h2>Hint: Use "GCal's send email to guests" to copy names</h2>
-      {showNames && (
-        <h1>
-          <Badge pill bg="primary">
-            Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆
-          </Badge>
-        </h1>
-
-        // <h2>Chosen one:🎆{chosenNames[chosenNames.length - 1]}🎆</h2>
-      )}
-      <form onSubmit={handleAdd}>
-        {showTextArea && (
-          <textarea
-            value={names}
-            onChange={handleNames}
-            rows="10"
-            cols="70"
-            required
-          ></textarea>
-        )}
-
-        <br />
-        {addButton && <Button type="submit">Add</Button>}
+      <h1>Random Selector, DSS All Hands Mississauga</h1>
+      <h4>Hint: Use "GCal's send email to guests" to copy names</h4>
+      <br />
+      <Row>
         {randomButton && (
-          <Button onClick={handleRandom} variant="info">
-            Randomly Select One
-          </Button>
+          <Col xs={7} onSubmit={handleRandom}>
+            <Form>
+              <Row>
+                <Col xs={4}>
+                  <Button type="submit" variant="info">
+                    Randomly Select
+                  </Button>
+                </Col>
+                <Col xs={3}>
+                  <Form.Control
+                    type="number"
+                    min={1}
+                    onChange={handleNumber}
+                    value={number}
+                    required
+                  ></Form.Control>
+                </Col>
+              </Row>
+            </Form>
+          </Col>
         )}
-      </form>
+        {showNames && (
+          <Col>
+            <h1>
+              <Badge pill bg="primary">
+                Chosen:🎆{chosenNames[chosenNames.length - 1]}🎆
+              </Badge>
+            </h1>
+          </Col>
+        )}
+      </Row>
+      <Form onSubmit={handleAdd}>
+        <Form.Group>
+          {showTextArea && (
+            <textarea
+              value={names}
+              onChange={handleNames}
+              rows="10"
+              cols="70"
+              required
+            ></textarea>
+          )}
+          <br />
+          {addButton && <Button type="submit">Add</Button>}
+        </Form.Group>
+      </Form>
       <br />
       <NamesList names={namesArray} chosenNames={chosenNames} />
     </Container>
