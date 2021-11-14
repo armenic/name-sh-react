@@ -79,6 +79,7 @@ function App() {
   const [chosenNames, setChosenNames] = useState([]);
   const [showNames, setShowNames] = useState(false);
   const [showTextArea, setShowTextArea] = useState(true);
+  const [showNumber, setShowNumber] = useState(true);
 
   function handleNames(event) {
     setNames(event.target.value);
@@ -91,6 +92,7 @@ function App() {
     event.preventDefault();
     setNamesArray(makeArray(names));
     setRandomButton(true);
+    setShowNumber(true);
     setAddButton(false);
     setShowNames(false);
     setShowTextArea(false);
@@ -104,19 +106,29 @@ function App() {
 
     if (remainder) {
       window.alert(
-        `Value ${number} has to be a divisor of 
-        Total number ${namesArray.length}, 
+        `Value ${number} has to be a divisor of Total number ${namesArray.length}, 
         e.g. 2 is a divisor of 4 (no remainder left)`
       );
     } else {
-      let chosenName = randomValueFromArray(namesArray);
-      setChosenNames((prevState) => [...prevState, chosenName]);
+      setShowNumber(false);
+      // need to select number of times
+      for (let t = 0; t < number; t++) {
+        let chosenName = randomValueFromArray(namesArray);
+        setChosenNames((prevState) => [...prevState, chosenName]);
+      }
       setShowNames(true);
-      if (namesArray.length === chosenNames.length + 1) {
+      console.log(namesArray.length);
+      console.log(chosenNames.length);
+      if (namesArray.length === chosenNames.length) {
         setRandomButton(false);
         setShowTextArea(true);
         setAddButton(true);
-        console.log("Everybody was chosen!");
+        window.alert(
+          `Everybody was chosen! Last chosen:\n${chosenNames
+            .slice(-number)
+            .join("\n")}`
+        );
+        setShowNames(false);
       }
     }
   }
@@ -124,7 +136,10 @@ function App() {
   return (
     <Container>
       <h1>Random Selector, DSS All Hands Mississauga</h1>
-      <h4>Hint: Use "GCal's send email to guests" to copy names</h4>
+      {showTextArea && (
+        <h4>Hint: Use "GCal's send email to guests" to copy names</h4>
+      )}
+
       <br />
       <Row>
         {randomButton && (
@@ -136,26 +151,30 @@ function App() {
                     Randomly Select
                   </Button>
                 </Col>
-                <Col xs={3}>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    onChange={handleNumber}
-                    value={number}
-                    required
-                  ></Form.Control>
-                </Col>
+                {showNumber && (
+                  <Col xs={3}>
+                    <Form.Control
+                      type="number"
+                      min={1}
+                      onChange={handleNumber}
+                      value={number}
+                      required
+                    ></Form.Control>
+                  </Col>
+                )}
               </Row>
             </Form>
           </Col>
         )}
         {showNames && (
           <Col>
-            <h1>
-              <Badge pill bg="primary">
-                Chosen:🎆{chosenNames[chosenNames.length - 1]}🎆
-              </Badge>
-            </h1>
+            {chosenNames.slice(-number).map((chosen, i) => (
+              <h1 key={i}>
+                <Badge pill bg="primary">
+                  Chosen:🎆{chosen}🎆
+                </Badge>
+              </h1>
+            ))}
           </Col>
         )}
       </Row>
