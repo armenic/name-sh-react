@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Badge from "react-bootstrap/Badge";
 import Form from "react-bootstrap/Form";
-import Row from "react-bootstrap/Row";
+import Stack from "react-bootstrap/Stack";
 import Col from "react-bootstrap/Col";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -137,47 +137,41 @@ function App() {
     <Container>
       <h1>Random Selector, DSS All Hands Mississauga</h1>
       {showTextArea && (
-        <h4>Hint: Use "GCal's send email to guests" to copy names</h4>
+        <em>
+          <h4>Hint: Use "GCal's send email to guests" to copy names</h4>
+        </em>
       )}
 
       <br />
-      <Row>
-        {randomButton && (
-          <Col xs={7} onSubmit={handleRandom}>
-            <Form>
-              <Row>
-                <Col xs={4}>
-                  <Button type="submit" variant="info">
-                    Randomly Select
-                  </Button>
-                </Col>
-                {showNumber && (
-                  <Col xs={3}>
-                    <Form.Control
-                      type="number"
-                      min={1}
-                      onChange={handleNumber}
-                      value={number}
-                      required
-                    ></Form.Control>
-                  </Col>
-                )}
-              </Row>
-            </Form>
-          </Col>
-        )}
-        {showNames && (
-          <Col>
-            {chosenNames.slice(-number).map((chosen, i) => (
-              <h1 key={i}>
-                <Badge pill bg="primary">
-                  Chosen:🎆{chosen}🎆
-                </Badge>
-              </h1>
-            ))}
-          </Col>
-        )}
-      </Row>
+      {randomButton && (
+        <Form onSubmit={handleRandom}>
+          <Stack direction="horizontal" gap={3}>
+            <Button type="submit" variant="info">
+              Randomly Select
+            </Button>
+            {showNumber && (
+              <Col xs={2} md={2}>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  onChange={handleNumber}
+                  value={number}
+                  required
+                ></Form.Control>
+              </Col>
+            )}
+          </Stack>
+        </Form>
+      )}
+      <br />
+      {showNames &&
+        chosenNames.slice(-number).map((chosen, i) => (
+          <h3 key={i}>
+            <Badge pill bg="primary">
+              Chosen:🎆{chosen}🎆
+            </Badge>
+          </h3>
+        ))}
       <Form onSubmit={handleAdd}>
         <Form.Group>
           {showTextArea && (
