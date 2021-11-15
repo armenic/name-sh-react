@@ -9,16 +9,6 @@ import Modal from "react-bootstrap/Modal";
 import Alert from "react-bootstrap/Alert";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-function getDivisors(n) {
-  let divisors = [];
-  for (let i = 1; i <= n; i++) {
-    if (n % i === 0) {
-      divisors.push(i);
-    }
-  }
-  return divisors;
-}
-
 function Help(props) {
   return (
     <Modal {...props} size="lg">
@@ -43,8 +33,7 @@ function Help(props) {
             after adding a list, choose the number of items to be selected
           </li>
           <li>
-            the number has to be a divisor of total number of items(e.g. choose
-            2 out of 4)
+            the number has to less or equal to the remaining number of items
           </li>
           <li>click Randomly Select</li>
           <li>the app will print chosen items</li>
@@ -58,6 +47,7 @@ function Help(props) {
 function NamesList(props) {
   let names = props.names;
   let chosens = props.chosenNames;
+  let remainingNames = props.remainingNames;
   const listItems = names.map((name, i) => {
     let liStyle;
     if (chosens.includes(name)) {
@@ -75,7 +65,9 @@ function NamesList(props) {
 
   return (
     <>
-      <p>Total number: {names.length}</p>
+      <p>
+        Total number: {names.length}, remaining number: {remainingNames}
+      </p>
       <ul>{listItems}</ul>
     </>
   );
@@ -124,11 +116,11 @@ function App() {
   const [addButton, setAddButton] = useState(true);
   const [namesArray, setNamesArray] = useState([]);
   const [chosenNames, setChosenNames] = useState([]);
+  const [lastChosen, setLastChosen] = useState([]);
   const [showNames, setShowNames] = useState(false);
   const [showTextArea, setShowTextArea] = useState(true);
-  const [showNumber, setShowNumber] = useState(true);
   const [modalShow, setModalShow] = useState(false);
-  const [alertDivisorShow, setAlertDivisorShow] = useState(false);
+  const [alertNumberShow, setAlertNumberShow] = useState(false);
   const [alertCompleteShow, setAlertCompleteShow] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
 
@@ -137,7 +129,7 @@ function App() {
   }
   function handleNumber(event) {
     setNumber(event.target.value);
-    setAlertDivisorShow(false);
+    setAlertNumberShow(false);
   }
 
   function handleAdd(event) {
@@ -145,7 +137,6 @@ function App() {
     setNamesArray(makeArray(names));
     setRandomButton(true);
     setNumber(1);
-    setShowNumber(true);
     setAddButton(false);
     setShowNames(false);
     setShowTextArea(false);
@@ -153,19 +144,26 @@ function App() {
     alreadyDone.length = 0;
   }
 
+  let remainingNames = namesArray.length - chosenNames.length;
+  if (remainingNames < 0) {
+    remainingNames = 0;
+  }
+
   function handleRandom(event) {
     event.preventDefault();
-    let remainder = namesArray.length % parseInt(number);
 
-    if (remainder) {
-      setAlertDivisorShow(true);
+    if (remainingNames !== 0 && number > remainingNames) {
+      setAlertNumberShow(true);
     } else {
-      setShowNumber(false);
-      // need to select number of times
+      // setShowNumber(false);
+      // need to select randomly "number of times"
+      const tempLastChosens = [];
       for (let t = 0; t < number; t++) {
         let chosenName = randomValueFromArray(namesArray);
+        tempLastChosens.push(chosenName);
         setChosenNames((prevState) => [...prevState, chosenName]);
       }
+      setLastChosen(tempLastChosens);
       setShowNames(true);
       if (namesArray.length === chosenNames.length) {
         setAlertCompleteShow(true);
@@ -181,7 +179,11 @@ function App() {
     setAddButton(true);
     setShowNames(false);
     setShowRestart(false);
+    setNamesArray([]);
   }
+
+  const alertStyle = { width: "50%" };
+  const namesToShow = [...lastChosen].sort()
 
   return (
     <Container>
@@ -194,33 +196,35 @@ function App() {
             <Button type="submit" variant="success">
               Randomly Select
             </Button>
-            {showNumber && (
-              <Col xs={2} md={2}>
-                <Form.Control
-                  type="number"
-                  min={1}
-                  onChange={handleNumber}
-                  value={number}
-                  required
-                  placeholder={`divisor of ${namesArray.length}`}
-                ></Form.Control>
-              </Col>
-            )}
+            {/* {showNumber && ( */}
+            <Col xs={2} md={2}>
+              <Form.Control
+                type="number"
+                min={1}
+                onChange={handleNumber}
+                value={number}
+                required
+                placeholder={`<= ${remainingNames}`}
+              ></Form.Control>
+            </Col>
+            {/* )} */}
           </Stack>
-          {alertDivisorShow && (
-            <Alert
-              variant="danger"
-              onClose={() => setAlertDivisorShow(false)}
-              dismissible
-            >
-              <Alert.Heading>Invalid Divisor</Alert.Heading>
-              <p>
-                {`Value has to be a divisor of Total number
-                 ${namesArray.length}, consider using ${getDivisors(
-                  namesArray.length
-                )}`}
-              </p>
-            </Alert>
+          {alertNumberShow && (
+            <>
+              <br />
+              <Alert
+                variant="danger"
+                onClose={() => setAlertNumberShow(false)}
+                dismissible
+                style={alertStyle}
+              >
+                <Alert.Heading>Invalid Number to Choose</Alert.Heading>
+                <p>
+                  {`Value has to be less or equal to the remaining number of
+                   names, ${remainingNames}`}
+                </p>
+              </Alert>
+            </>
           )}
         </Form>
       )}
@@ -230,6 +234,7 @@ function App() {
           variant="danger"
           onClose={() => setAlertCompleteShow(false)}
           dismissible
+          style={alertStyle}
         >
           <Alert.Heading>Everybody Was Chosen</Alert.Heading>
           <p>Press the Restart button if you wish to start again</p>
@@ -239,11 +244,12 @@ function App() {
         <>
           <Button onClick={handleRestart}>Restart</Button>
           <br />
+          <br />
         </>
       )}
 
       {showNames &&
-        chosenNames.slice(-number).map((chosen, i) => (
+        namesToShow.map((chosen, i) => (
           <h3 key={i}>
             <Badge pill bg="primary">
               Chosen:🎆{chosen}🎆
@@ -274,7 +280,11 @@ function App() {
         </Form.Group>
       </Form>
       <br />
-      <NamesList names={namesArray} chosenNames={chosenNames} />
+      <NamesList
+        names={namesArray}
+        chosenNames={chosenNames}
+        remainingNames={remainingNames}
+      />
       <Help show={modalShow} onHide={() => setModalShow(false)} />
     </Container>
   );

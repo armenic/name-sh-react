@@ -5,7 +5,7 @@
 - paste a list with one item per line into the text area and click Add
 - the app will remove duplicated and empty lines
 - after adding a list, choose the number of items to be selected
-- the number has to be a divisor of total number of items(e.g. choose 2 out of 4)
+- the number has to less or equal to the remaining number of items
 - click Randomly Select
 - the app will print chosen items
 
