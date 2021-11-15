@@ -6,7 +6,18 @@ import Form from "react-bootstrap/Form";
 import Stack from "react-bootstrap/Stack";
 import Col from "react-bootstrap/Col";
 import Modal from "react-bootstrap/Modal";
+import Alert from "react-bootstrap/Alert";
 import "bootstrap/dist/css/bootstrap.min.css";
+
+function getDivisors(n) {
+  let divisors = [];
+  for (let i = 1; i <= n; i++) {
+    if (n % i === 0) {
+      divisors.push(i);
+    }
+  }
+  return divisors;
+}
 
 function Help(props) {
   return (
@@ -15,22 +26,30 @@ function Help(props) {
         <Modal.Title>Random Selector</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ul></ul>
-        <li>
-          the app randomly selects requested number of items from provided list
-        </li>
-        <li>
-          paste a list with one item per line into the text area and click Add
-        </li>
-        <li>for Google Calendar use "send email to guests" to copy names as a list</li>
-        <li>the app will remove duplicated and empty lines</li>
-        <li>after adding a list, choose the number of items to be selected</li>
-        <li>
-          the number has to be a divisor of total number of items(e.g. choose 2
-          out of 4)
-        </li>
-        <li>click Randomly Select</li>
-        <li>the app will print chosen items</li>
+        <ul>
+          <li>
+            the app randomly selects requested number of items from provided
+            list
+          </li>
+          <li>
+            paste a list with one item per line into the text area and click Add
+          </li>
+          <li>
+            for Google Calendar use "send email to guests" to copy names as a
+            list
+          </li>
+          <li>the app will remove duplicated and empty lines</li>
+          <li>
+            after adding a list, choose the number of items to be selected
+          </li>
+          <li>
+            the number has to be a divisor of total number of items(e.g. choose
+            2 out of 4)
+          </li>
+          <li>click Randomly Select</li>
+          <li>the app will print chosen items</li>
+        </ul>
+        <a href="https://github.com/armenic/random-selector">Code on GitHub</a>
       </Modal.Body>
     </Modal>
   );
@@ -109,18 +128,23 @@ function App() {
   const [showTextArea, setShowTextArea] = useState(true);
   const [showNumber, setShowNumber] = useState(true);
   const [modalShow, setModalShow] = useState(false);
+  const [alertDivisorShow, setAlertDivisorShow] = useState(false);
+  const [alertCompleteShow, setAlertCompleteShow] = useState(false);
+  const [showRestart, setShowRestart] = useState(false);
 
   function handleNames(event) {
     setNames(event.target.value);
   }
   function handleNumber(event) {
     setNumber(event.target.value);
+    setAlertDivisorShow(false);
   }
 
   function handleAdd(event) {
     event.preventDefault();
     setNamesArray(makeArray(names));
     setRandomButton(true);
+    setNumber(1);
     setShowNumber(true);
     setAddButton(false);
     setShowNames(false);
@@ -134,10 +158,7 @@ function App() {
     let remainder = namesArray.length % parseInt(number);
 
     if (remainder) {
-      window.alert(
-        `Value ${number} has to be a divisor of Total number ${namesArray.length}, 
-        e.g. 2 is a divisor of 4 (no remainder left)`
-      );
+      setAlertDivisorShow(true);
     } else {
       setShowNumber(false);
       // need to select number of times
@@ -147,17 +168,19 @@ function App() {
       }
       setShowNames(true);
       if (namesArray.length === chosenNames.length) {
+        setAlertCompleteShow(true);
         setRandomButton(false);
-        setShowTextArea(true);
-        setAddButton(true);
-        window.alert(
-          `Everybody was chosen! Last chosen:\n${chosenNames
-            .slice(-number)
-            .join("\n")}`
-        );
-        setShowNames(false);
+        setShowRestart(true);
       }
     }
+  }
+
+  function handleRestart() {
+    setAlertCompleteShow(false);
+    setShowTextArea(true);
+    setAddButton(true);
+    setShowNames(false);
+    setShowRestart(false);
   }
 
   return (
@@ -179,13 +202,46 @@ function App() {
                   onChange={handleNumber}
                   value={number}
                   required
+                  placeholder={`divisor of ${namesArray.length}`}
                 ></Form.Control>
               </Col>
             )}
           </Stack>
+          {alertDivisorShow && (
+            <Alert
+              variant="danger"
+              onClose={() => setAlertDivisorShow(false)}
+              dismissible
+            >
+              <Alert.Heading>Invalid Divisor</Alert.Heading>
+              <p>
+                {`Value has to be a divisor of Total number
+                 ${namesArray.length}, consider using ${getDivisors(
+                  namesArray.length
+                )}`}
+              </p>
+            </Alert>
+          )}
         </Form>
       )}
       <br />
+      {alertCompleteShow && (
+        <Alert
+          variant="danger"
+          onClose={() => setAlertCompleteShow(false)}
+          dismissible
+        >
+          <Alert.Heading>Everybody Was Chosen</Alert.Heading>
+          <p>Press the Restart button if you wish to start again</p>
+        </Alert>
+      )}
+      {showRestart && (
+        <>
+          <Button onClick={handleRestart}>Restart</Button>
+          <br />
+        </>
+      )}
+
       {showNames &&
         chosenNames.slice(-number).map((chosen, i) => (
           <h3 key={i}>
@@ -197,14 +253,14 @@ function App() {
       <Form onSubmit={handleAdd}>
         <Form.Group>
           {showTextArea && (
-            <textarea
+            <Form.Control
+              as="textarea"
+              style={{ width: "50rem", height: "10rem" }}
               value={names}
               onChange={handleNames}
-              rows="10"
-              cols="70"
               placeholder="paste a list with one item per line and click Add"
               required
-            ></textarea>
+            ></Form.Control>
           )}
           <br />
           {addButton && (
