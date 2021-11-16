@@ -16,28 +16,30 @@ function Help(props) {
         <Modal.Title>Random Selector</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <ul>
+        <p>
+          The app randomly selects requested number of items from provided list.
+          It will remove duplicated and empty lines.
+        </p>
+        <ol>
           <li>
-            the app randomly selects requested number of items from provided
-            list
+            paste a list with one item per line into the text area and click{" "}
+            <strong>Add</strong> button
+          </li>
+          <ul>
+            <li>
+              for Google Calendar use "send email to guests" to copy names as a
+              list
+            </li>
+          </ul>
+          <li>
+            choose the number of items to be selected, the number has to be less
+            or equal to the remaining number of items
           </li>
           <li>
-            paste a list with one item per line into the text area and click Add
+            click <strong>Randomly Select</strong> button
           </li>
-          <li>
-            for Google Calendar use "send email to guests" to copy names as a
-            list
-          </li>
-          <li>the app will remove duplicated and empty lines</li>
-          <li>
-            after adding a list, choose the number of items to be selected
-          </li>
-          <li>
-            the number has to less or equal to the remaining number of items
-          </li>
-          <li>click Randomly Select</li>
           <li>the app will print chosen items</li>
-        </ul>
+        </ol>
         <a href="https://github.com/armenic/random-selector">Code on GitHub</a>
       </Modal.Body>
     </Modal>
@@ -183,7 +185,7 @@ function App() {
   }
 
   const alertStyle = { width: "50%" };
-  const namesToShow = [...lastChosen].sort()
+  const namesToShow = [...lastChosen].sort();
 
   return (
     <Container>
@@ -237,7 +239,7 @@ function App() {
           style={alertStyle}
         >
           <Alert.Heading>Everybody Was Chosen</Alert.Heading>
-          <p>Press the Restart button if you wish to start again</p>
+          <p>Press the Restart button to start again</p>
         </Alert>
       )}
       {showRestart && (
