@@ -238,7 +238,7 @@ function App() {
           dismissible
           style={alertStyle}
         >
-          <Alert.Heading>Everybody Was Chosen</Alert.Heading>
+          <Alert.Heading>No more options to choose</Alert.Heading>
           <p>Press the Restart button to start again</p>
         </Alert>
       )}
