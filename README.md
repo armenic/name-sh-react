@@ -18,6 +18,9 @@
 1. `npx gulp`, this will modify the `build/index.html` to be monolith file
    that can be deployed by itself (e.g. embed in Google Sites)
 
+### Deployed App
+https://random-selector.englishapps.ca
+
 ## References
 
 - [How to Bundle your React App in a Single File](https://www.labnol.org/code/bundle-react-app-single-file-200514)
